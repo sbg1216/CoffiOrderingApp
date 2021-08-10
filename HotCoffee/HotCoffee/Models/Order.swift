@@ -41,7 +41,7 @@ extension Order {
     static func create(vm: AddCoffeeOrderViewModel) -> Resource<Order?> {
         
         let order = Order(vm)
-        guard let url = URL(string: "http://guared-retreat-82533.herokuapp.com/orders") else {
+        guard let url = URL(string: "https://guared-retreat-82533.herokuapp.com/orders") else {
             fatalError("URL is incorrect!")
         }
         

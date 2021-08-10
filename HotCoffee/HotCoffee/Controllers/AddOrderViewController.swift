@@ -8,7 +8,14 @@
 import Foundation
 import UIKit
 
+protocol AddCoffeeOrderDelegate {
+    func addCoffeeOrderViewControllerDidSave(order: Order, controller: UIViewController)
+    func addCoffeeOrderViewControllerDidClose(controller: UIViewController)
+}
+
 class AddOrderViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    var delegate: AddCoffeeOrderDelegate?
     
     @IBOutlet weak var tableview: UITableView!
     @IBOutlet weak var nameTextField: UITextField!
@@ -63,6 +70,14 @@ class AddOrderViewController: UIViewController, UITableViewDelegate, UITableView
         tableview.cellForRow(at: indexPath)?.accessoryType = .none
     }
     
+    @IBAction func close() {
+        
+        if let delegate = self.delegate {
+            delegate.addCoffeeOrderViewControllerDidClose(controller: self)
+        }
+    }
+    
+    
     @IBAction func save() {
         let name = self.nameTextField.text
         let email = self.emailTextField.text
@@ -77,5 +92,20 @@ class AddOrderViewController: UIViewController, UITableViewDelegate, UITableView
         self.vm.selectedSize = selectedSize
         self.vm.selectedType = self.vm.types[indexPath.row]
         
+        WebService().load(resource: Order.create(vm: self.vm)) { result in
+            
+            switch result {
+            case .success(let order):
+                
+                if let order = order, let delegate = self.delegate {
+                    DispatchQueue.main.async {
+                        delegate.addCoffeeOrderViewControllerDidSave(order: order, controller: self)
+                    }
+                }
+                
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
 }
